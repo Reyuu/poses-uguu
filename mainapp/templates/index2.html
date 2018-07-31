@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Poses for artists!" />
+    <title>Random dA pose!</title>
+    {% load static %}
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta property="og:title" content="poses.uguu.space" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://poses.uguu.space/" />
+    <meta property="og:image" content="https://poses.uguu.space{% static 'favicon.png' %}" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:description" content="Poses for artists!" />
+    <link rel="fluid-icon" type="image/png" href="{% static 'favicon.png' %}" />
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.png' %}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/siimple@3.1.0/dist/siimple.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <link href="{% static 'main.css' %}" rel="stylesheet">
+    <link rel="icon" href="{% static 'favicon.png' %}">
+    <script>
+    function jsUcfirst(s) 
+        {
+            //console.log(s);
+            return s.charAt(0).toUpperCase() + s.slice(1);
+        }
+    function feedback(){
+        $.post("feedback",
+        {
+            feedback: $("#feedback-box-textbox").val(),
+            csrfmiddlewaretoken: Cookies.get('csrftoken')
+            }, function(data, status){
+            //on succesful
+                if("error" in data){
+                    x = jsUcfirst(data["error"]);
+                    swal("Error!", x, "error");
+                }
+                else{
+                    $("#feedback-box-textbox").val("");
+                    x = jsUcfirst(data["ok"]);
+                    swal({
+                        title: "OK!",
+                        text: x,
+                        icon: "success",
+                        });
+                }
+        })
+    }
+    function suggest(){
+        $.post("suggest",
+        {
+            username: $("#suggestion-box-textbox").val(),
+            csrfmiddlewaretoken: Cookies.get('csrftoken')
+            }, function(data, status){
+            //on succesful
+                if("error" in data){
+                    x = jsUcfirst(data["error"]);
+                    swal("Error!", x, "error");
+                }
+                else{
+                    $("#suggestion-box-textbox").val("");
+                    x = jsUcfirst(data["ok"]);
+                    swal({
+                        title: "OK!",
+                        text: x,
+                        icon: "success",
+                        });
+                }
+        })
+    }
+    $(function(){
+        $("#suggestion-box-submit").click(suggest);
+        $("#feedback-box-submit").click(feedback);
+    })
+    </script>
+</head>
+<body>
+    <div class="siimple-box siimple-box--green siimple-content" style="text-align:center;">
+        <div class="siimple-box-title">Aggregated poses from deviantArt</div>
+        <div class="siimple-box-subtitle">{{ count }} images in the database</div>
+    </div>
+    <div class="containing siimple-grid">
+        <div class="siimple-grid-row" style="width: 50%">
+            <div class="siimple-alert siimple-alert--error">
+                    Warning! Contains mature content!
+            </div>
+        </div>
+        <div class="siimple-grid-row">
+        <a href="poses" class="siimple-btn siimple-btn--blue siimple-btn--huge">Random pose from dA</a><br>
+        </div>
+        <div class="siimple-grid-row">
+        You find something that isn't right just click "Report!", it won't be viewable anymore after my review.
+        </div>
+        <br>
+        <div class="siimple-grid-row">
+            <div class="siimple-grid-col siimple-grid-col--6 siimple-grid-col--sm-12">
+                <div class="siimple-form">
+                        <div class="siimple-form-title" style="font-size: 16px">Suggestion box (enter ONLY nickname from dA):</div>
+                    <div class="siimple-form-field">
+                        <textarea id="suggestion-box-textbox" class="siimple-input" placeholder="for example: `SenshiStock`" style="width:300px;height: 50px;"></textarea>
+                    </div>
+                    <div class="siimple-form-field">
+                        <div class="siimple-btn siimple-btn--blue" id="suggestion-box-submit">Submit</div>
+                    </div>
+                </div>
+            </div>
+            <div class="siimple-grid-col siimple-grid-col--6 siimple-grid-col--sm-12">
+                <div class="siimple-form-title" style="font-size: 16px">Feedback box:</div>
+                <div class="siimple-form-field">
+                        <textarea id="feedback-box-textbox" class="siimple-input" placeholder="Write something nice" style="width:300px;height: 50px;"></textarea>
+                </div>
+                <div class="siimple-form-field">
+                        <div class="siimple-btn siimple-btn--blue" id="feedback-box-submit">Submit</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

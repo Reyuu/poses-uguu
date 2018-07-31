@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Mod panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/siimple@3.1.0/dist/siimple.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js" integrity="sha384-3LK/3kTpDE/Pkp8gTNp2gR/2gOiwQ6QaO7Td0zV76UFJVhqLl4Vl3KL1We6q6wR9" crossorigin="anonymous"></script>
+</head>
+<body>
+    <style>
+        .report{
+            display: inline;
+            vertical-align: middle;
+            width:500px;
+            height: 500px;
+        }
+        .cross-no{
+            position:relative;
+            left: 150px;
+            bottom:200px;
+            height: inherit;
+            width: calc(inherit/2);
+            font-size: 100px;
+            color: #f06060;
+            opacity: 0.5;
+            filter: alpha(opacity=50); /* For IE8 and earlier */
+        }
+        .checkmark-yes{
+            position:relative;
+            right: 150px;
+            bottom:200px;
+            font-size: 100px;
+            color: #68db68;
+            opacity: 0.5;
+            filter: alpha(opacity=50); /* For IE8 and earlier */
+        }
+        .small-image{
+            width:inherit;
+            height: inherit;
+        }
+    </style>
+    <script>
+        var clicked = false;
+        var urls = [];
+        function jsUcfirst(s) 
+        {
+            //console.log(s);
+            return s.charAt(0).toUpperCase() + s.slice(1);
+        }
+        String.prototype.formatUnicorn = String.prototype.formatUnicorn ||
+            function () {
+                "use strict";
+                var str = this.toString();
+                if (arguments.length) {
+                    var t = typeof arguments[0];
+                    var key;
+                    var args = ("string" === t || "number" === t) ?
+                        Array.prototype.slice.call(arguments)
+                        : arguments[0];
+
+                    for (key in args) {
+                        str = str.replace(new RegExp("\\{" + key + "\\}", "gi"), args[key]);
+                    }
+                }
+
+                return str;
+            };
+        function handle_choice(dat){
+            $.post("mod_handle_report", dat, function(data, status){
+                console.log(data)
+                if (data["ok"] == "done!"){
+                    $("#div-"+dat.deviationid).remove();
+                }
+            });
+        }
+        function no(id){
+            handle_choice({deviationid:id, type:false});
+        }
+        function yes(id){
+            handle_choice({deviationid:id, type:true});
+        }
+        function get_pic(id){
+            var tmp;
+            $.post("mod_get_pic_by_id", {deviationid:id},function(data, status){
+                if("error" in data){
+                            x = jsUcfirst(data["error"]);
+                            swal("Error!", x, "error");
+                        }
+                else{
+                    console.log(data.data);
+                    urls[id] = data.data;
+                    }
+            });
+        }
+        function create_images(data){
+            var pic_element = `<div id="div-{0}" class="report">
+            <span class="cross-no" onclick=no("{0}")><i class="fas fa-times-circle"></i></span>
+            <img src="{1}" id="img-{0}" class="small-image">
+            <span class="checkmark-yes" onclick=yes("{0}")><i class="fas fa-check-circle"></i></span>
+            </div><br>`;
+            x = JSON.parse(data["data"])
+            for (var i = 0, len = x.length; i < len; i++) {
+                var dev_id = x[i]["fields"]["deviationid"];
+                var src;
+                get_pic(dev_id);
+                src = "";
+                console.log("create: "+src);
+                $("#all-pics").append(
+                    pic_element.formatUnicorn(dev_id, src)
+                );
+            }
+        }
+        
+        function update_pics(){
+            console.log(urls);
+            for (var key in urls) {
+                console.log(urls[key]);
+                url = urls[key];
+                
+                $("#img-"+key).attr("src", url);
+            };
+        }
+
+        function get_all(){
+            if (!clicked){
+                $.post("mod_get_all_reports",
+                {
+                    csrfmiddlewaretoken: Cookies.get('csrftoken')
+                    }, function(data, status){
+                    //on succesful
+                        if("error" in data){
+                            x = jsUcfirst(data["error"]);
+                            swal("Error!", x, "error");
+                        }
+                        else{
+                            $("#feedback-box-textbox").val("");
+                            x = jsUcfirst(data["ok"]);
+                            swal({
+                                title: "OK!",
+                                text: x,
+                                icon: "success",
+                                });
+                            clicked = true;
+                            create_images(data);
+                        }
+                });
+            }
+        }
+        $(function(){
+            $("#get-all-reports").click(get_all);
+            $("#update-images").click(update_pics);
+        });
+    </script>
+    <div>
+        <div class="siimple-navbar siimple-navbar--dark">
+            <div style="margin-left: 10px">
+                <a id="get-all-reports" class="siimple-btn siimple-btn--primary">Get all reports</a>
+                <a id="update-images" class="siimple-btn siimple-btn--primary">Update images</a>
+                <a id="logout" class="siimple-btn siimple-btn--primary" href="logout">Logout</a>
+            </div>
+        </div>
+        <div id="all-pics" class="siimple-content">  
+        </div>
+    </div>
+</body>
+</html>

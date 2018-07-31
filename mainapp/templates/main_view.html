@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Poses for artists!">
+    <title>Random dA pose!</title>
+    {% load static %}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="poses.uguu.space" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://poses.uguu.space/" />
+    <meta property="og:image" content="{% static 'favicon.png' %}" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:description" content="Poses for artists!" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <script src="{% static 'main.js' %}"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/siimple@3.1.0/dist/siimple.min.css">
+    <link href="{% static 'main.css' %}" rel="stylesheet">
+    <link href="{% static 'main.css' %}" rel="stylesheet">
+    <link rel="icon" href="{% static 'favicon.png' %}">
+    <script>
+    function report(){
+        $.post("report_image",
+        {
+            deviation_id: obj["deviation_id"],
+            csrfmiddlewaretoken: Cookies.get('csrftoken')
+            }, function(data, status){
+                if("error" in data){
+                    x = jsUcfirst(data["error"]);
+                    swal("Error!", x, "error");
+                }
+                else{
+                    $("#feedback-box-textbox").val("");
+                    x = jsUcfirst(data["ok"]);
+                    swal({
+                        title: "OK!",
+                        text: x,
+                        icon: "success",
+                        });
+                }
+            })
+    }
+    $(function(){
+        $("#report-button").click(report);
+    });
+    </script>
+</head>
+<body>
+    <span id="timer" class="absolute-timer"></span>
+    <div class="containing">
+        <div class="siimple-navbar siimple-navbar--dark" style="z-index: -100; width:100%">
+                <button id="change-button" class="siimple-btn siimple-btn--light">Change!</button>
+                <button id="report-button" class="siimple-btn siimple-btn--light">Report!</button>
+                <button id="url-button" class="siimple-btn siimple-btn--light" title="Go to deviation page!"><img src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/deviantart.svg" width="16px" height="16px"></button>
+                <select id="time-select" class="siimple-select siimple-select--white">
+                    <option value="5">5s</option>
+                    <option value="10">10s</option>
+                    <option value="15">15s</option>
+                    <option value="30" selected>30s</option>
+                    <option value="45">45s</option>
+                    <option value="60">1m</option>
+                    <option value="120">2m</option>
+                    <option value="300">5m</option>
+                </select>
+                <button id="start-timer" class="siimple-btn siimple-btn--light">Start timed!</button>
+        </div>
+        
+        <img id="pose" src="" style="z-index: 0;padding-top:10px">
+    </div>
+    <div class="siimple-spinner siimple-spinner--light siimple-spinner--large absolute-center" id="spinner"></div>
+</body>
+</html>
